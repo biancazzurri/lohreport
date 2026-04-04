@@ -81,8 +81,12 @@ export async function parseFood(text: string): Promise<MealItem[]> {
     });
 
     const content = response.choices[0]?.message?.content ?? "[]";
+    console.log("[food-parser] model:", "gpt-4o-mini");
+    console.log("[food-parser] input:", text);
+    console.log("[food-parser] raw response:", content);
     // Strip markdown code fences if present
     const cleaned = content.replace(/^```(?:json)?\n?/g, "").replace(/\n?```$/g, "").trim();
+    console.log("[food-parser] cleaned:", cleaned);
     const parsedItems: ParsedItem[] = JSON.parse(cleaned);
 
     // 4. Cache each parsed item and build result
