@@ -34,7 +34,7 @@ export function MacroSlider({
       <input
         type="range"
         min={0}
-        max={500}
+        max={Math.round(totalCalories / calPerGram)}
         value={grams}
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full accent-[color:var(--accent)] h-2 rounded-full cursor-pointer"

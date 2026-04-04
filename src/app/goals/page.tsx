@@ -40,6 +40,56 @@ export default function GoalsPage() {
     setFat(Math.round(fat * ratio));
   }
 
+  // Protein changes → carbs absorb, then fat
+  function handleProteinChange(newProtein: number) {
+    const proteinCal = newProtein * 4;
+    const remainingCal = calories - proteinCal;
+    const oldCarbsCal = carbs * 4;
+    const oldFatCal = fat * 9;
+    const oldOtherCal = oldCarbsCal + oldFatCal;
+
+    if (remainingCal <= 0) {
+      setProtein(newProtein);
+      setCarbs(0);
+      setFat(0);
+      return;
+    }
+
+    // Try to keep fat the same, adjust carbs
+    let newFatCal = oldFatCal;
+    let newCarbsCal = remainingCal - newFatCal;
+
+    if (newCarbsCal < 0) {
+      // Carbs exhausted, fat absorbs the rest
+      newCarbsCal = 0;
+      newFatCal = remainingCal;
+    }
+
+    setProtein(newProtein);
+    setCarbs(Math.max(0, Math.round(newCarbsCal / 4)));
+    setFat(Math.max(0, Math.round(newFatCal / 9)));
+  }
+
+  // Carbs changes → fat absorbs
+  function handleCarbsChange(newCarbs: number) {
+    const proteinCal = protein * 4;
+    const carbsCal = newCarbs * 4;
+    const remainingForFat = calories - proteinCal - carbsCal;
+
+    setCarbs(newCarbs);
+    setFat(Math.max(0, Math.round(remainingForFat / 9)));
+  }
+
+  // Fat changes → carbs absorb
+  function handleFatChange(newFat: number) {
+    const proteinCal = protein * 4;
+    const fatCal = newFat * 9;
+    const remainingForCarbs = calories - proteinCal - fatCal;
+
+    setFat(newFat);
+    setCarbs(Math.max(0, Math.round(remainingForCarbs / 4)));
+  }
+
   async function handleSave() {
     await saveSettings({
       calorieGoal: calories,
@@ -99,7 +149,7 @@ export default function GoalsPage() {
           grams={protein}
           calPerGram={4}
           totalCalories={calories}
-          onChange={setProtein}
+          onChange={handleProteinChange}
         />
         <MacroSlider
           label="Carbs"
@@ -107,7 +157,7 @@ export default function GoalsPage() {
           grams={carbs}
           calPerGram={4}
           totalCalories={calories}
-          onChange={setCarbs}
+          onChange={handleCarbsChange}
         />
         <MacroSlider
           label="Fat"
@@ -115,7 +165,7 @@ export default function GoalsPage() {
           grams={fat}
           calPerGram={9}
           totalCalories={calories}
-          onChange={setFat}
+          onChange={handleFatChange}
         />
       </div>
 
