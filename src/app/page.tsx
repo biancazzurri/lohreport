@@ -64,7 +64,7 @@ export default function Home() {
           onNext={() => setDate((d) => shiftDate(d, 1))}
         />
 
-        <CalorieRing current={totals.calories} target={settings.calorieGoal} compact={scrolled} />
+        <CalorieRing current={totals.calories} target={settings.calorieGoal} />
 
         <div className="transition-all duration-300 ease-in-out overflow-hidden"
           style={{ maxHeight: scrolled ? 0 : 60, opacity: scrolled ? 0 : 1 }}>
