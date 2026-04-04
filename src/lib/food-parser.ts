@@ -73,7 +73,6 @@ export async function parseFood(text: string): Promise<MealItem[]> {
 
     const response = await client.chat.completions.create({
       model: "gpt-5",
-      temperature: 0,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: text },
