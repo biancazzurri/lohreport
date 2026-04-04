@@ -49,7 +49,7 @@ export default function GoalsPage() {
     const calPer = { protein: 4, carbs: 4, fat: 9 };
 
     // Cap the changed macro so it can't exceed total on its own
-    const maxGrams = Math.floor(calories / calPer[changed]);
+    const maxGrams = Math.round(calories / calPer[changed]);
     const capped = Math.min(Math.max(0, newGrams), maxGrams);
 
     // Absorb order: the one below first, then the other
@@ -68,12 +68,12 @@ export default function GoalsPage() {
     const second = order[1];
     const secondWant = result[second] * calPer[second];
     const secondCal = Math.min(secondWant, remaining);
-    result[second] = Math.floor(secondCal / calPer[second]);
+    result[second] = Math.round(secondCal / calPer[second]);
     remaining -= result[second] * calPer[second];
 
     // First absorber gets everything that's left
     const first = order[0];
-    result[first] = Math.floor(remaining / calPer[first]);
+    result[first] = Math.round(remaining / calPer[first]);
 
     setProtein(result.protein);
     setCarbs(result.carbs);
