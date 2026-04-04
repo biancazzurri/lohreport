@@ -40,51 +40,40 @@ export default function GoalsPage() {
     setFat(Math.round(fat * ratio));
   }
 
-  // Order: protein=0, carbs=1, fat=2
   // When a macro changes, the diff goes to the one below first,
-  // then the other one. Never exceed total calories.
+  // then the other. The total always equals calories exactly.
   function adjustMacros(
     changed: "protein" | "carbs" | "fat",
     newGrams: number
   ) {
     const calPer = { protein: 4, carbs: 4, fat: 9 };
-    const current = { protein, carbs, fat };
 
-    // Cap: the changed macro can't exceed total calories on its own
+    // Cap the changed macro so it can't exceed total on its own
     const maxGrams = Math.floor(calories / calPer[changed]);
     const capped = Math.min(Math.max(0, newGrams), maxGrams);
 
-    const usedCal = capped * calPer[changed];
-    const remaining = calories - usedCal;
-
-    // Determine absorb order: the one below first, then the other
+    // Absorb order: the one below first, then the other
     const order: ("protein" | "carbs" | "fat")[] =
       changed === "protein" ? ["carbs", "fat"] :
       changed === "carbs"   ? ["fat", "protein"] :
                               ["carbs", "protein"];
 
-    const result = { ...current };
+    // Budget remaining after the changed macro
+    let remaining = calories - capped * calPer[changed];
+
+    const result = { protein, carbs, fat };
     result[changed] = capped;
 
-    // How many calories were freed or consumed by the change
-    const oldCal = current[changed] * calPer[changed];
-    const newCal = capped * calPer[changed];
-    let diffCal = oldCal - newCal; // positive = freed, negative = need to take
-
-    // First absorber takes the diff
-    const first = order[0];
-    const firstCurrentCal = result[first] * calPer[first];
-    const firstNewCal = Math.max(0, firstCurrentCal + diffCal);
-    result[first] = Math.floor(firstNewCal / calPer[first]);
-    // What the first absorber couldn't absorb passes to the second
-    const firstActualDiff = result[first] * calPer[first] - firstCurrentCal;
-    diffCal -= firstActualDiff;
-
-    // Second absorber takes the remainder
+    // Second absorber keeps its value if budget allows, otherwise shrinks
     const second = order[1];
-    const secondCurrentCal = result[second] * calPer[second];
-    const secondNewCal = Math.max(0, secondCurrentCal + diffCal);
-    result[second] = Math.floor(secondNewCal / calPer[second]);
+    const secondWant = result[second] * calPer[second];
+    const secondCal = Math.min(secondWant, remaining);
+    result[second] = Math.floor(secondCal / calPer[second]);
+    remaining -= result[second] * calPer[second];
+
+    // First absorber gets everything that's left
+    const first = order[0];
+    result[first] = Math.floor(remaining / calPer[first]);
 
     setProtein(result.protein);
     setCarbs(result.carbs);
