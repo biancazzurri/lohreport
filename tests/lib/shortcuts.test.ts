@@ -136,9 +136,31 @@ describe("getShortcuts", () => {
   });
 
   it("breaks ties by recency (lastUsed desc)", async () => {
-    // Two meals each added once; rice is more recent
-    await addMeal({ items: [CHICKEN_ITEM], date: "2026-04-02", time: "12:00" });
-    await addMeal({ items: [RICE_ITEM], date: "2026-04-04", time: "12:00" });
+    const now = new Date("2026-04-04T12:00:00Z").getTime();
+    // Insert chicken with an older createdAt
+    await db.meals.put({
+      id: "chicken-meal",
+      date: "2026-04-02",
+      time: "12:00",
+      items: [CHICKEN_ITEM],
+      totalCalories: 165,
+      totalProtein: 31,
+      totalCarbs: 0,
+      totalFat: 3.6,
+      createdAt: now - 2 * 24 * 60 * 60 * 1000, // 2 days ago
+    });
+    // Insert rice with a more recent createdAt
+    await db.meals.put({
+      id: "rice-meal",
+      date: "2026-04-04",
+      time: "12:00",
+      items: [RICE_ITEM],
+      totalCalories: 200,
+      totalProtein: 4,
+      totalCarbs: 45,
+      totalFat: 0.4,
+      createdAt: now, // today
+    });
 
     const shortcuts = await getShortcuts();
 
