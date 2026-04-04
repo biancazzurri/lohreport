@@ -42,7 +42,8 @@ describe("parseFood", () => {
 
     const mockResponseItems = [
       {
-        name: "chicken breast",
+        name: "Chicken Breast",
+        displayText: "100g Chicken Breast",
         quantity: 100,
         unit: "g",
         calories: 165,
@@ -66,12 +67,12 @@ describe("parseFood", () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].parsed).toBe(true);
-    expect(result[0].name).toBe("chicken breast");
+    expect(result[0].name).toBe("Chicken Breast");
     expect(result[0].calories).toBe(165);
     expect(result[0].protein).toBe(31);
     expect(result[0].carbs).toBe(0);
     expect(result[0].fat).toBeCloseTo(3.6);
-    expect(result[0].rawText).toBe("100g chicken breast");
+    expect(result[0].rawText).toBe("100g Chicken Breast");
   });
 
   it("uses cached results when available", async () => {
@@ -105,7 +106,8 @@ describe("parseFood", () => {
 
     const mockResponseItems = [
       {
-        name: "oats",
+        name: "Oats",
+        displayText: "50g Oats",
         quantity: 50,
         unit: "g",
         calories: 190,
@@ -127,8 +129,8 @@ describe("parseFood", () => {
 
     await parseFood("50g oats");
 
-    // Check item is in cache
-    const cached = await db.nutritionCache.get("50g oats");
+    // Check item is in cache (keyed by displayText)
+    const cached = await db.nutritionCache.get("50g Oats");
     expect(cached).toBeDefined();
     expect(cached?.calories).toBe(190);
   });

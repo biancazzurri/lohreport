@@ -87,12 +87,16 @@ describe("MealCard", () => {
 
   it("renders per-item macros for parsed items", () => {
     render(<MealCard meal={parsedMeal} onDelete={vi.fn()} />);
-    expect(screen.getByText("P: 8g · C: 54g · F: 5g")).toBeInTheDocument();
+    expect(screen.getByText("P 33g")).toBeInTheDocument();
+    expect(screen.getByText("C 62g")).toBeInTheDocument();
+    expect(screen.getByText("F 7g")).toBeInTheDocument();
   });
 
   it("renders meal total macros", () => {
     render(<MealCard meal={parsedMeal} onDelete={vi.fn()} />);
-    expect(screen.getByText("P: 33g · C: 62g · F: 7g")).toBeInTheDocument();
+    expect(screen.getByText("P 33g")).toBeInTheDocument();
+    expect(screen.getByText("C 62g")).toBeInTheDocument();
+    expect(screen.getByText("F 7g")).toBeInTheDocument();
   });
 
   it("shows 'pending' for unparsed items", () => {

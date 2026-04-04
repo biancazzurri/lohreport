@@ -6,19 +6,23 @@ import type { MealItem } from "./types";
 const SYSTEM_PROMPT = `You are a nutrition analysis assistant. Parse the user's food description and return ONLY a valid JSON array of food items. No markdown, no explanation — just the raw JSON array.
 
 Each item in the array must have these fields:
-- name: string
+- name: string (clean, normalized name — e.g. "Cottage Cheese", "Corn Crackers", "Chicken Breast")
+- displayText: string (human-friendly label with quantity — e.g. "200g Cottage Cheese", "3 Corn Crackers")
 - quantity: number
-- unit: string
+- unit: string (use short units: g, ml, piece, tbsp, tsp, cup)
 - calories: number
 - protein: number (grams)
 - carbs: number (grams)
 - fat: number (grams)
 
+Normalize names: capitalize properly, use common English names, remove redundant words.
+
 Example output:
-[{"name":"chicken breast","quantity":100,"unit":"g","calories":165,"protein":31,"carbs":0,"fat":3.6}]`;
+[{"name":"Chicken Breast","displayText":"100g Chicken Breast","quantity":100,"unit":"g","calories":165,"protein":31,"carbs":0,"fat":3.6}]`;
 
 interface ParsedItem {
   name: string;
+  displayText: string;
   quantity: number;
   unit: string;
   calories: number;
@@ -92,9 +96,9 @@ export async function parseFood(text: string): Promise<MealItem[]> {
     const mealItems: MealItem[] = [];
 
     for (const item of parsedItems) {
-      const itemRawText = `${item.quantity}${item.unit} ${item.name}`;
+      const displayText = item.displayText || `${item.quantity} ${item.unit} ${item.name}`;
       await cacheNutrition({
-        key: itemRawText,
+        key: displayText,
         name: item.name,
         quantity: item.quantity,
         unit: item.unit,
@@ -105,7 +109,7 @@ export async function parseFood(text: string): Promise<MealItem[]> {
       });
 
       mealItems.push({
-        rawText: itemRawText,
+        rawText: displayText,
         name: item.name,
         quantity: item.quantity,
         unit: item.unit,
