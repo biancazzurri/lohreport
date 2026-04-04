@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useMeals } from "@/hooks/use-meals";
 import { useSettings } from "@/hooks/use-settings";
@@ -25,9 +25,18 @@ function shiftDate(date: string, days: number): string {
 
 export default function Home() {
   const [date, setDate] = useState(todayDate);
+  const [scrolled, setScrolled] = useState(false);
   const meals = useMeals(date);
   const settings = useSettings();
   const totals = useDailyTotals(date);
+
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 40);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   async function handleDelete(id: string) {
     await deleteMeal(id);
@@ -36,37 +45,38 @@ export default function Home() {
 
   return (
     <div className="pb-24">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-4">
-        <h1 className="text-base font-semibold text-gray-200">Health Tracker</h1>
-        <Link
-          href="/settings"
-          className="text-gray-400 hover:text-gray-200 text-xl"
-          aria-label="Settings"
-        >
-          ⚙
-        </Link>
+      {/* Sticky header */}
+      <div className={`sticky top-0 z-10 bg-[#1a1a2e] transition-all duration-200 ${scrolled ? "pb-2 shadow-lg shadow-black/20" : "pb-0"}`}>
+        <div className="flex items-center justify-between px-4 pt-4">
+          <h1 className="text-base font-semibold text-gray-200">Health Tracker</h1>
+          <Link
+            href="/settings"
+            className="text-gray-400 hover:text-gray-200 text-xl"
+            aria-label="Settings"
+          >
+            ⚙
+          </Link>
+        </div>
+
+        <DateNav
+          date={date}
+          onPrev={() => setDate((d) => shiftDate(d, -1))}
+          onNext={() => setDate((d) => shiftDate(d, 1))}
+        />
+
+        <CalorieRing current={totals.calories} target={settings.calorieGoal} compact={scrolled} />
+
+        <MacroBars
+          protein={{ current: totals.protein, target: settings.proteinGoal }}
+          carbs={{ current: totals.carbs, target: settings.carbsGoal }}
+          fat={{ current: totals.fat, target: settings.fatGoal }}
+        />
       </div>
 
-      {/* Date Navigation */}
-      <DateNav
-        date={date}
-        onPrev={() => setDate((d) => shiftDate(d, -1))}
-        onNext={() => setDate((d) => shiftDate(d, 1))}
-      />
-
-      {/* Calorie Ring */}
-      <CalorieRing current={totals.calories} target={settings.calorieGoal} />
-
-      {/* Macro Bars */}
-      <MacroBars
-        protein={{ current: totals.protein, target: settings.proteinGoal }}
-        carbs={{ current: totals.carbs, target: settings.carbsGoal }}
-        fat={{ current: totals.fat, target: settings.fatGoal }}
-      />
-
       {/* Meal List */}
-      <MealList meals={meals} onDelete={handleDelete} />
+      <div className="px-4">
+        <MealList meals={meals} onDelete={handleDelete} />
+      </div>
 
       {/* Floating Add Button */}
       <AddButton />
