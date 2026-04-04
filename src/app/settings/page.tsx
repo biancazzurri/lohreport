@@ -145,7 +145,7 @@ export default function SettingsPage() {
             <span className="text-xs text-[#f48fb1]">{apiKeyError}</span>
           )}
           {!apiKeySaved && !apiKeyError && settings.chatgptApiKey ? (
-            <span className="text-xs text-[#81c784]">Connected</span>
+            <span className="text-xs text-[#81c784]">Connected · {settings.chatgptApiKey.slice(0, 5)}...{settings.chatgptApiKey.slice(-4)}</span>
           ) : !apiKeySaved && !apiKeyError && !settings.chatgptApiKey ? (
             <span className="text-xs text-gray-500">Not configured</span>
           ) : null}
