@@ -72,7 +72,7 @@ export async function parseFood(text: string): Promise<MealItem[]> {
     });
 
     const response = await client.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4.1-nano",
       temperature: 0,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
@@ -81,7 +81,7 @@ export async function parseFood(text: string): Promise<MealItem[]> {
     });
 
     const content = response.choices[0]?.message?.content ?? "[]";
-    console.log("[food-parser] model:", "gpt-4o-mini");
+    console.log("[food-parser] model:", "gpt-4.1-nano");
     console.log("[food-parser] input:", text);
     console.log("[food-parser] raw response:", content);
     // Strip markdown code fences if present
