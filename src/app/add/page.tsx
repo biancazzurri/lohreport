@@ -18,12 +18,16 @@ export default function AddPage() {
   const shortcuts = useShortcuts();
   const [parsedItems, setParsedItems] = useState<MealItem[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleTextSubmit(text: string) {
     setLoading(true);
+    setError("");
     try {
       const items = await parseFood(text);
       setParsedItems(items);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to parse food");
     } finally {
       setLoading(false);
     }
@@ -59,6 +63,10 @@ export default function AddPage() {
         </Link>
         <h1 className="text-base font-semibold text-gray-200">Add Meal</h1>
       </div>
+
+      {error && (
+        <div className="bg-[#f48fb1]/10 text-[#f48fb1] text-sm rounded-lg p-3 mb-4">{error}</div>
+      )}
 
       {loading ? (
         <div className="text-center text-gray-400 py-8">Parsing...</div>

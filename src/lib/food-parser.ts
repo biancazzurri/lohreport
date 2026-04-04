@@ -65,50 +65,70 @@ export async function parseFood(text: string): Promise<MealItem[]> {
   }
 
   // 3. Call OpenAI
-  const client = new OpenAI({
-    apiKey: settings.chatgptApiKey,
-    dangerouslyAllowBrowser: true,
-  });
-
-  const response = await client.chat.completions.create({
-    model: "gpt-4o-mini",
-    temperature: 0,
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: text },
-    ],
-  });
-
-  const content = response.choices[0]?.message?.content ?? "[]";
-  const parsedItems: ParsedItem[] = JSON.parse(content);
-
-  // 4. Cache each parsed item and build result
-  const mealItems: MealItem[] = [];
-
-  for (const item of parsedItems) {
-    await cacheNutrition({
-      key: text,
-      name: item.name,
-      quantity: item.quantity,
-      unit: item.unit,
-      calories: item.calories,
-      protein: item.protein,
-      carbs: item.carbs,
-      fat: item.fat,
+  try {
+    const client = new OpenAI({
+      apiKey: settings.chatgptApiKey,
+      dangerouslyAllowBrowser: true,
     });
 
-    mealItems.push({
-      rawText: text,
-      name: item.name,
-      quantity: item.quantity,
-      unit: item.unit,
-      calories: item.calories,
-      protein: item.protein,
-      carbs: item.carbs,
-      fat: item.fat,
-      parsed: true,
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      temperature: 0,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: text },
+      ],
     });
+
+    const content = response.choices[0]?.message?.content ?? "[]";
+    // Strip markdown code fences if present
+    const cleaned = content.replace(/^```(?:json)?\n?/g, "").replace(/\n?```$/g, "").trim();
+    const parsedItems: ParsedItem[] = JSON.parse(cleaned);
+
+    // 4. Cache each parsed item and build result
+    const mealItems: MealItem[] = [];
+
+    for (const item of parsedItems) {
+      const itemRawText = `${item.quantity}${item.unit} ${item.name}`;
+      await cacheNutrition({
+        key: itemRawText,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        calories: item.calories,
+        protein: item.protein,
+        carbs: item.carbs,
+        fat: item.fat,
+      });
+
+      mealItems.push({
+        rawText: itemRawText,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        calories: item.calories,
+        protein: item.protein,
+        carbs: item.carbs,
+        fat: item.fat,
+        parsed: true,
+      });
+    }
+
+    return mealItems;
+  } catch (err) {
+    console.error("Food parsing failed:", err);
+    return [
+      {
+        rawText: text,
+        name: text,
+        quantity: 1,
+        unit: "",
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        parsed: false,
+      },
+    ];
   }
-
-  return mealItems;
 }
