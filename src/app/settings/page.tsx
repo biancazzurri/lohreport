@@ -24,7 +24,7 @@ export default function SettingsPage() {
   const [clearConfirm2, setClearConfirm2] = useState(false);
   const [clearing, setClearing] = useState(false);
 
-  const s3Bucket = process.env.NEXT_PUBLIC_S3_BUCKET ?? "(not configured)";
+  const s3Bucket = process.env.NEXT_PUBLIC_S3_BUCKET ?? "";
 
   async function handleSaveApiKey() {
     setApiKeyError("");
@@ -152,37 +152,40 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      {/* S3 Backup */}
-      <section className="bg-[#252545] rounded-xl p-4 mb-4">
-        <h2 className="text-sm font-semibold text-gray-200 mb-2">S3 Backup</h2>
-        <div className="text-xs text-gray-500">
-          Bucket:{" "}
-          <span className="text-gray-300 font-mono">{s3Bucket}</span>
-        </div>
-      </section>
+      {/* S3 Backup — only show when configured */}
+      {s3Bucket && (
+        <>
+          <section className="bg-[#252545] rounded-xl p-4 mb-4">
+            <h2 className="text-sm font-semibold text-gray-200 mb-2">S3 Backup</h2>
+            <div className="text-xs text-gray-500">
+              Bucket:{" "}
+              <span className="text-gray-300 font-mono">{s3Bucket}</span>
+            </div>
+          </section>
 
-      {/* Restore from Backup */}
-      <section className="bg-[#252545] rounded-xl p-4 mb-4">
-        <h2 className="text-sm font-semibold text-gray-200 mb-3">
-          Restore from Backup
-        </h2>
-        <button
-          type="button"
-          onClick={handleRestore}
-          disabled={restoring}
-          className="px-4 py-2 rounded-lg bg-[#1a1a2e] text-gray-300 text-sm hover:text-gray-100 hover:bg-[#2d2d55] transition-colors disabled:opacity-50"
-        >
-          {restoring ? "Restoring..." : "Restore from S3"}
-        </button>
-        {restoreSuccess && (
-          <p className="text-xs text-[#81c784] mt-2">
-            Data restored successfully.
-          </p>
-        )}
-        {restoreError && (
-          <p className="text-xs text-[#f48fb1] mt-2">{restoreError}</p>
-        )}
-      </section>
+          <section className="bg-[#252545] rounded-xl p-4 mb-4">
+            <h2 className="text-sm font-semibold text-gray-200 mb-3">
+              Restore from Backup
+            </h2>
+            <button
+              type="button"
+              onClick={handleRestore}
+              disabled={restoring}
+              className="px-4 py-2 rounded-lg bg-[#1a1a2e] text-gray-300 text-sm hover:text-gray-100 hover:bg-[#2d2d55] transition-colors disabled:opacity-50"
+            >
+              {restoring ? "Restoring..." : "Restore from S3"}
+            </button>
+            {restoreSuccess && (
+              <p className="text-xs text-[#81c784] mt-2">
+                Data restored successfully.
+              </p>
+            )}
+            {restoreError && (
+              <p className="text-xs text-[#f48fb1] mt-2">{restoreError}</p>
+            )}
+          </section>
+        </>
+      )}
 
       {/* Clear All Data */}
       <section className="bg-[#252545] rounded-xl p-4 border border-[#f48fb1]/30">
