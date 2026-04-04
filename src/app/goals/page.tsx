@@ -68,13 +68,17 @@ export default function GoalsPage() {
 
     let budget = remaining;
 
-    for (const macro of order) {
-      // Try to keep current value, but cap to what budget allows
-      const wantCal = current[macro] * calPer[macro];
-      const canCal = Math.min(wantCal, budget);
-      result[macro] = Math.max(0, Math.floor(canCal / calPer[macro]));
-      budget -= result[macro] * calPer[macro];
-    }
+    // First absorber gets all the freed/lost calories
+    const first = order[0];
+    const firstGrams = Math.max(0, Math.floor(budget / calPer[first]));
+    result[first] = firstGrams;
+    budget -= firstGrams * calPer[first];
+
+    // Second absorber gets whatever is left
+    const second = order[1];
+    const secondGrams = Math.max(0, Math.floor(budget / calPer[second]));
+    result[second] = secondGrams;
+    budget -= secondGrams * calPer[second];
 
     setProtein(result.protein);
     setCarbs(result.carbs);
