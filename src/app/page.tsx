@@ -66,11 +66,14 @@ export default function Home() {
 
         <CalorieRing current={totals.calories} target={settings.calorieGoal} compact={scrolled} />
 
-        <MacroBars
-          protein={{ current: totals.protein, target: settings.proteinGoal }}
-          carbs={{ current: totals.carbs, target: settings.carbsGoal }}
-          fat={{ current: totals.fat, target: settings.fatGoal }}
-        />
+        <div className="transition-all duration-300 ease-in-out overflow-hidden"
+          style={{ maxHeight: scrolled ? 0 : 60, opacity: scrolled ? 0 : 1 }}>
+          <MacroBars
+            protein={{ current: totals.protein, target: settings.proteinGoal }}
+            carbs={{ current: totals.carbs, target: settings.carbsGoal }}
+            fat={{ current: totals.fat, target: settings.fatGoal }}
+          />
+        </div>
       </div>
 
       {/* Meal List */}
