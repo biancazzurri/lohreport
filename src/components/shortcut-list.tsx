@@ -5,9 +5,10 @@ import type { Shortcut } from "@/lib/shortcuts";
 interface ShortcutListProps {
   shortcuts: Shortcut[];
   onSelect: (shortcut: Shortcut) => void;
+  onDismiss: (fingerprint: string) => void;
 }
 
-export function ShortcutList({ shortcuts, onSelect }: ShortcutListProps) {
+export function ShortcutList({ shortcuts, onSelect, onDismiss }: ShortcutListProps) {
   if (shortcuts.length === 0) return null;
 
   return (
@@ -21,11 +22,11 @@ export function ShortcutList({ shortcuts, onSelect }: ShortcutListProps) {
             .map((item) => item.rawText)
             .join(" + ");
           return (
-            <li key={shortcut.fingerprint}>
+            <li key={shortcut.fingerprint} className="relative">
               <button
                 type="button"
                 onClick={() => onSelect(shortcut)}
-                className="w-full text-left bg-[#252545] rounded-xl px-4 py-3 hover:bg-[#2d2d55] transition-colors"
+                className="w-full text-left bg-[#252545] rounded-xl px-4 py-3 pr-10 hover:bg-[#2d2d55] transition-colors"
               >
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-sm text-gray-200 truncate mr-2">
@@ -40,6 +41,17 @@ export function ShortcutList({ shortcuts, onSelect }: ShortcutListProps) {
                   {Math.round(shortcut.totalCarbs)}g · F:{" "}
                   {Math.round(shortcut.totalFat)}g
                 </div>
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDismiss(shortcut.fingerprint);
+                }}
+                className="absolute top-3 right-3 text-gray-600 hover:text-red-400 text-xs"
+                aria-label="Remove shortcut"
+              >
+                ✕
               </button>
             </li>
           );

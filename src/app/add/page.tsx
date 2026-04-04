@@ -9,6 +9,7 @@ import { ParsedPreview } from "@/components/parsed-preview";
 import { useShortcuts } from "@/hooks/use-shortcuts";
 import { parseFood } from "@/lib/food-parser";
 import { addMeal } from "@/lib/meals";
+import { dismissShortcut } from "@/lib/shortcuts";
 import { scheduleBackup } from "@/lib/backup";
 import type { MealItem } from "@/lib/types";
 import type { Shortcut } from "@/lib/shortcuts";
@@ -79,7 +80,7 @@ export default function AddPage() {
       ) : (
         <>
           <MealInput onSubmit={handleTextSubmit} />
-          <ShortcutList shortcuts={shortcuts} onSelect={handleShortcutSelect} />
+          <ShortcutList shortcuts={shortcuts} onSelect={handleShortcutSelect} onDismiss={dismissShortcut} />
         </>
       )}
     </div>

@@ -69,10 +69,19 @@ export async function getShortcuts(): Promise<Shortcut[]> {
     }
   );
 
-  shortcuts.sort((a, b) => {
+  // Filter out dismissed shortcuts
+  const dismissed = await db.dismissedShortcuts.toArray();
+  const dismissedSet = new Set(dismissed.map((d) => d.fingerprint));
+  const filtered = shortcuts.filter((s) => !dismissedSet.has(s.fingerprint));
+
+  filtered.sort((a, b) => {
     if (b.count !== a.count) return b.count - a.count;
     return b.lastUsed - a.lastUsed;
   });
 
-  return shortcuts.slice(0, 10);
+  return filtered.slice(0, 10);
+}
+
+export async function dismissShortcut(fingerprint: string): Promise<void> {
+  await db.dismissedShortcuts.put({ fingerprint, dismissedAt: Date.now() });
 }
