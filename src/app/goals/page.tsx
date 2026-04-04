@@ -31,6 +31,15 @@ export default function GoalsPage() {
     settings.fatGoal,
   ]);
 
+  function handleCaloriesChange(newCal: number) {
+    const prev = calories || 1;
+    const ratio = newCal / prev;
+    setCalories(newCal);
+    setProtein(Math.round(protein * ratio));
+    setCarbs(Math.round(carbs * ratio));
+    setFat(Math.round(fat * ratio));
+  }
+
   async function handleSave() {
     await saveSettings({
       calorieGoal: calories,
@@ -62,7 +71,7 @@ export default function GoalsPage() {
         <div className="flex items-center justify-between">
           <button
             type="button"
-            onClick={() => setCalories((c) => Math.max(0, c - 50))}
+            onClick={() => handleCaloriesChange(Math.max(0, calories - 50))}
             className="w-10 h-10 rounded-full bg-[#1a1a2e] text-gray-300 text-lg font-bold hover:bg-[#2d2d55] transition-colors"
             aria-label="Decrease calories"
           >
@@ -73,7 +82,7 @@ export default function GoalsPage() {
           </span>
           <button
             type="button"
-            onClick={() => setCalories((c) => c + 50)}
+            onClick={() => handleCaloriesChange(calories + 50)}
             className="w-10 h-10 rounded-full bg-[#1a1a2e] text-gray-300 text-lg font-bold hover:bg-[#2d2d55] transition-colors"
             aria-label="Increase calories"
           >
