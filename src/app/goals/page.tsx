@@ -40,54 +40,45 @@ export default function GoalsPage() {
     setFat(Math.round(fat * ratio));
   }
 
-  // Protein changes → carbs absorb, then fat
-  function handleProteinChange(newProtein: number) {
-    const proteinCal = newProtein * 4;
-    const remainingCal = calories - proteinCal;
-    const oldCarbsCal = carbs * 4;
-    const oldFatCal = fat * 9;
-    const oldOtherCal = oldCarbsCal + oldFatCal;
+  // Order: protein=0, carbs=1, fat=2
+  // When a macro changes, the diff goes to the one below first,
+  // then the other one. Never exceed total calories.
+  function adjustMacros(
+    changed: "protein" | "carbs" | "fat",
+    newGrams: number
+  ) {
+    const calPer = { protein: 4, carbs: 4, fat: 9 };
+    const current = { protein, carbs, fat };
 
-    if (remainingCal <= 0) {
-      setProtein(newProtein);
-      setCarbs(0);
-      setFat(0);
-      return;
+    // Cap: the changed macro can't exceed total calories on its own
+    const maxGrams = Math.floor(calories / calPer[changed]);
+    const capped = Math.min(Math.max(0, newGrams), maxGrams);
+
+    const usedCal = capped * calPer[changed];
+    const remaining = calories - usedCal;
+
+    // Determine absorb order: the one below first, then the other
+    const order: ("protein" | "carbs" | "fat")[] =
+      changed === "protein" ? ["carbs", "fat"] :
+      changed === "carbs"   ? ["fat", "protein"] :
+                              ["carbs", "protein"];
+
+    const result = { protein, carbs, fat };
+    result[changed] = capped;
+
+    let budget = remaining;
+
+    for (const macro of order) {
+      // Try to keep current value, but cap to what budget allows
+      const wantCal = current[macro] * calPer[macro];
+      const canCal = Math.min(wantCal, budget);
+      result[macro] = Math.max(0, Math.floor(canCal / calPer[macro]));
+      budget -= result[macro] * calPer[macro];
     }
 
-    // Try to keep fat the same, adjust carbs
-    let newFatCal = oldFatCal;
-    let newCarbsCal = remainingCal - newFatCal;
-
-    if (newCarbsCal < 0) {
-      // Carbs exhausted, fat absorbs the rest
-      newCarbsCal = 0;
-      newFatCal = remainingCal;
-    }
-
-    setProtein(newProtein);
-    setCarbs(Math.max(0, Math.round(newCarbsCal / 4)));
-    setFat(Math.max(0, Math.round(newFatCal / 9)));
-  }
-
-  // Carbs changes → fat absorbs
-  function handleCarbsChange(newCarbs: number) {
-    const proteinCal = protein * 4;
-    const carbsCal = newCarbs * 4;
-    const remainingForFat = calories - proteinCal - carbsCal;
-
-    setCarbs(newCarbs);
-    setFat(Math.max(0, Math.round(remainingForFat / 9)));
-  }
-
-  // Fat changes → carbs absorb
-  function handleFatChange(newFat: number) {
-    const proteinCal = protein * 4;
-    const fatCal = newFat * 9;
-    const remainingForCarbs = calories - proteinCal - fatCal;
-
-    setFat(newFat);
-    setCarbs(Math.max(0, Math.round(remainingForCarbs / 4)));
+    setProtein(result.protein);
+    setCarbs(result.carbs);
+    setFat(result.fat);
   }
 
   async function handleSave() {
@@ -149,7 +140,7 @@ export default function GoalsPage() {
           grams={protein}
           calPerGram={4}
           totalCalories={calories}
-          onChange={handleProteinChange}
+          onChange={(g) => adjustMacros("protein", g)}
         />
         <MacroSlider
           label="Carbs"
@@ -157,7 +148,7 @@ export default function GoalsPage() {
           grams={carbs}
           calPerGram={4}
           totalCalories={calories}
-          onChange={handleCarbsChange}
+          onChange={(g) => adjustMacros("carbs", g)}
         />
         <MacroSlider
           label="Fat"
@@ -165,7 +156,7 @@ export default function GoalsPage() {
           grams={fat}
           calPerGram={9}
           totalCalories={calories}
-          onChange={handleFatChange}
+          onChange={(g) => adjustMacros("fat", g)}
         />
       </div>
 
