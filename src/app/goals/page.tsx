@@ -63,22 +63,28 @@ export default function GoalsPage() {
       changed === "carbs"   ? ["fat", "protein"] :
                               ["carbs", "protein"];
 
-    const result = { protein, carbs, fat };
+    const result = { ...current };
     result[changed] = capped;
 
-    let budget = remaining;
+    // How many calories were freed or consumed by the change
+    const oldCal = current[changed] * calPer[changed];
+    const newCal = capped * calPer[changed];
+    let diffCal = oldCal - newCal; // positive = freed, negative = need to take
 
-    // First absorber gets all the freed/lost calories
+    // First absorber takes the diff
     const first = order[0];
-    const firstGrams = Math.max(0, Math.floor(budget / calPer[first]));
-    result[first] = firstGrams;
-    budget -= firstGrams * calPer[first];
+    const firstCurrentCal = result[first] * calPer[first];
+    const firstNewCal = Math.max(0, firstCurrentCal + diffCal);
+    result[first] = Math.floor(firstNewCal / calPer[first]);
+    // What the first absorber couldn't absorb passes to the second
+    const firstActualDiff = result[first] * calPer[first] - firstCurrentCal;
+    diffCal -= firstActualDiff;
 
-    // Second absorber gets whatever is left
+    // Second absorber takes the remainder
     const second = order[1];
-    const secondGrams = Math.max(0, Math.floor(budget / calPer[second]));
-    result[second] = secondGrams;
-    budget -= secondGrams * calPer[second];
+    const secondCurrentCal = result[second] * calPer[second];
+    const secondNewCal = Math.max(0, secondCurrentCal + diffCal);
+    result[second] = Math.floor(secondNewCal / calPer[second]);
 
     setProtein(result.protein);
     setCarbs(result.carbs);
