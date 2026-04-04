@@ -39,7 +39,7 @@ export default function SettingsPage() {
   }
 
   async function handleRestore() {
-    if (!window.confirm("Restore data from S3 backup? This will overwrite all current data.")) {
+    if (!window.confirm("Restore data from backup? This will overwrite all current data.")) {
       return;
     }
     setRestoring(true);

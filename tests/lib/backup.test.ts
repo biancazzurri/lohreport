@@ -44,30 +44,28 @@ describe("exportData", () => {
 
     await saveSettings({ calorieGoal: 2500, chatgptApiKey: "sk-test" });
 
-    const json = await exportData();
-    const parsed = JSON.parse(json);
+    const data = await exportData();
 
-    expect(parsed).toHaveProperty("meals");
-    expect(parsed).toHaveProperty("nutritionCache");
-    expect(parsed).toHaveProperty("settings");
+    expect(data).toHaveProperty("meals");
+    expect(data).toHaveProperty("nutritionCache");
+    expect(data).toHaveProperty("settings");
 
-    expect(parsed.meals).toHaveLength(1);
-    expect(parsed.meals[0].totalCalories).toBe(165);
+    expect(data.meals).toHaveLength(1);
+    expect(data.meals[0].totalCalories).toBe(165);
 
-    expect(parsed.nutritionCache).toHaveLength(1);
-    expect(parsed.nutritionCache[0].key).toBe("chicken-100g");
+    expect(data.nutritionCache).toHaveLength(1);
+    expect(data.nutritionCache[0].key).toBe("chicken-100g");
 
-    expect(parsed.settings).toHaveLength(1);
-    expect(parsed.settings[0].calorieGoal).toBe(2500);
+    expect(data.settings).toHaveLength(1);
+    expect(data.settings[0].calorieGoal).toBe(2500);
   });
 
   it("exports empty arrays when no data exists", async () => {
-    const json = await exportData();
-    const parsed = JSON.parse(json);
+    const data = await exportData();
 
-    expect(parsed.meals).toEqual([]);
-    expect(parsed.nutritionCache).toEqual([]);
-    expect(parsed.settings).toEqual([]);
+    expect(data.meals).toEqual([]);
+    expect(data.nutritionCache).toEqual([]);
+    expect(data.settings).toEqual([]);
   });
 });
 
@@ -125,7 +123,7 @@ describe("importData", () => {
       ],
     };
 
-    await importData(JSON.stringify(backupData));
+    await importData(backupData);
 
     const meals = await db.meals.toArray();
     expect(meals).toHaveLength(1);
@@ -145,9 +143,7 @@ describe("importData", () => {
   it("clears all data when importing empty arrays", async () => {
     await addMeal({ items: [], date: "2026-04-04", time: "10:00" });
 
-    await importData(
-      JSON.stringify({ meals: [], nutritionCache: [], settings: [] })
-    );
+    await importData({ meals: [], nutritionCache: [], settings: [] });
 
     const meals = await db.meals.toArray();
     expect(meals).toHaveLength(0);
