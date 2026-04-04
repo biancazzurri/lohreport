@@ -70,7 +70,13 @@ export default function AddPage() {
       )}
 
       {loading ? (
-        <div className="text-center text-gray-400 py-8">Parsing...</div>
+        <div className="flex flex-col items-center py-12 gap-4">
+          <div className="relative w-10 h-10">
+            <div className="absolute inset-0 rounded-full border-2 border-[#252545]" />
+            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#4fc3f7] animate-spin" />
+          </div>
+          <span className="text-sm text-gray-500">Analyzing your meal...</span>
+        </div>
       ) : parsedItems ? (
         <ParsedPreview
           items={parsedItems}
