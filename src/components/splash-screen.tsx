@@ -26,7 +26,7 @@ export function SplashScreen() {
       <img
         src="/splash.png"
         alt="Loh Report"
-        className="max-w-[280px] max-h-[280px] object-contain"
+        className="w-full h-full object-cover"
       />
     </div>
   );
