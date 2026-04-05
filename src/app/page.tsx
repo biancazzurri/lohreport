@@ -12,6 +12,7 @@ import { DateNav } from "@/components/date-nav";
 import { AddButton } from "@/components/add-button";
 import { deleteMeal } from "@/lib/meals";
 import { scheduleBackup } from "@/lib/backup";
+import { AuthGuard } from "@/components/auth-guard";
 
 function todayDate(): string {
   return new Date().toISOString().slice(0, 10);
@@ -47,6 +48,7 @@ export default function Home() {
   }
 
   return (
+    <AuthGuard>
     <div className="pb-24">
       {/* Sticky header */}
       <div className={`sticky top-0 z-10 bg-[#1a1a2e] transition-all duration-200 ${scrolled ? "pb-2 shadow-lg shadow-black/20" : "pb-0"}`}>
@@ -87,5 +89,6 @@ export default function Home() {
       {/* Floating Add Button */}
       <AddButton />
     </div>
+    </AuthGuard>
   );
 }

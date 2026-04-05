@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SessionProvider } from "@/components/session-provider";
 import { SplashScreen } from "@/components/splash-screen";
 import "./globals.css";
 
@@ -30,8 +31,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-[#1a1a2e] text-gray-200 min-h-screen max-w-[375px] mx-auto font-sans">
-        <SplashScreen />
-        {children}
+        <SessionProvider>
+          <SplashScreen />
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );

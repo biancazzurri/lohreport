@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 import { useSettings } from "@/hooks/use-settings";
 import { downloadBackup, importData } from "@/lib/backup";
 import { db } from "@/lib/db";
 
 export default function SettingsPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const settings = useSettings();
 
   const [restoring, setRestoring] = useState(false);
@@ -73,6 +75,24 @@ export default function SettingsPage() {
         </Link>
         <h1 className="text-base font-semibold text-gray-200">Settings</h1>
       </div>
+
+      {/* Account */}
+      {session?.user && (
+        <section className="bg-[#252545] rounded-xl p-4 mb-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <div className="text-sm font-medium text-gray-200">{session.user.name}</div>
+              <div className="text-xs text-gray-500">{session.user.email}</div>
+            </div>
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* Macro Goals */}
       <section className="bg-[#252545] rounded-xl p-4 mb-4">
