@@ -20,6 +20,7 @@ export default function AddPage() {
   const [parsedItems, setParsedItems] = useState<MealItem[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showingSuggestions, setShowingSuggestions] = useState(false);
 
   async function handleTextSubmit(text: string) {
     setLoading(true);
@@ -83,8 +84,10 @@ export default function AddPage() {
         />
       ) : (
         <>
-          <MealInput onSubmit={handleTextSubmit} />
-          <ShortcutList shortcuts={shortcuts} onSelect={handleShortcutSelect} onDismiss={dismissShortcut} />
+          <MealInput onSubmit={handleTextSubmit} onTypingChange={setShowingSuggestions} />
+          <div className={`transition-all duration-200 ${showingSuggestions ? "opacity-30 blur-sm pointer-events-none" : ""}`}>
+            <ShortcutList shortcuts={shortcuts} onSelect={handleShortcutSelect} onDismiss={dismissShortcut} />
+          </div>
         </>
       )}
     </div>

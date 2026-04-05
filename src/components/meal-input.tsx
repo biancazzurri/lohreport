@@ -6,9 +6,10 @@ import type { NutritionCacheEntry } from "@/lib/types";
 
 interface MealInputProps {
   onSubmit: (text: string) => void;
+  onTypingChange?: (isTyping: boolean) => void;
 }
 
-export function MealInput({ onSubmit }: MealInputProps) {
+export function MealInput({ onSubmit, onTypingChange }: MealInputProps) {
   const [value, setValue] = useState("");
   const [suggestions, setSuggestions] = useState<NutritionCacheEntry[]>([]);
   const [allFoods, setAllFoods] = useState<NutritionCacheEntry[]>([]);
@@ -30,7 +31,8 @@ export function MealInput({ onSubmit }: MealInputProps) {
         f.key.toLowerCase().includes(lower)
     );
     setSuggestions(filtered.slice(0, 6));
-  }, [value, allFoods]);
+    onTypingChange?.(filtered.length > 0);
+  }, [value, allFoods, onTypingChange]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && value.trim()) {
