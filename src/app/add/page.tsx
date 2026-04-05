@@ -34,10 +34,8 @@ export default function AddPage() {
     }
   }
 
-  async function handleShortcutSelect(shortcut: Shortcut) {
-    await addMeal({ items: shortcut.items });
-    scheduleBackup();
-    router.push("/");
+  function handleShortcutSelect(shortcut: Shortcut) {
+    setParsedItems(shortcut.items);
   }
 
   async function handleConfirm() {
