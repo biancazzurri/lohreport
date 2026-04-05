@@ -20,7 +20,7 @@ export function ShortcutList({ shortcuts, onSelect, onDismiss }: ShortcutListPro
         {shortcuts.map((shortcut) => {
           const description = shortcut.items
             .map((item) => item.rawText)
-            .join(" + ");
+            .join(", ");
           return (
             <li key={shortcut.fingerprint} className="relative">
               <button
