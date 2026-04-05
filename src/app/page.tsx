@@ -11,6 +11,7 @@ import { MealList } from "@/components/meal-list";
 import { DateNav } from "@/components/date-nav";
 import { AddButton } from "@/components/add-button";
 import { deleteMeal } from "@/lib/meals";
+import { syncFromServer } from "@/lib/sync";
 import { AuthGuard } from "@/components/auth-guard";
 
 function todayDate(): string {
@@ -32,6 +33,10 @@ export default function Home() {
   const meals = useMeals(date);
   const settings = useSettings();
   const totals = useDailyTotals(date);
+
+  useEffect(() => {
+    syncFromServer();
+  }, []);
 
   useEffect(() => {
     function onScroll() {
