@@ -42,8 +42,8 @@ export default function AddPage() {
   async function handleConfirm() {
     if (!parsedItems) return;
     await addMeal({ items: parsedItems });
-    scheduleBackup();
     router.push("/");
+    scheduleBackup();
   }
 
   function handleCancel() {

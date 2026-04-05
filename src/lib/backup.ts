@@ -30,12 +30,18 @@ export async function importData(data: BackupData): Promise<void> {
 
 async function uploadBackup(): Promise<void> {
   const data = await exportData();
+  console.log("[backup] uploading:", data.meals.length, "meals,", data.nutritionCache.length, "cached foods");
   const res = await fetch("/api/backup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!res.ok) console.error("Backup failed:", res.status);
+  if (!res.ok) {
+    const err = await res.text().catch(() => "");
+    console.error("[backup] failed:", res.status, err);
+  } else {
+    console.log("[backup] success");
+  }
 }
 
 export async function downloadBackup(): Promise<BackupData> {
