@@ -29,7 +29,7 @@ export function ShortcutList({ shortcuts, onSelect, onDismiss }: ShortcutListPro
                 className="w-full text-left bg-[#252545] rounded-xl px-4 py-3 pr-10 hover:bg-[#2d2d55] transition-colors"
               >
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-gray-200 truncate mr-2">
+                  <span className="text-sm text-gray-200 mr-2">
                     {description}
                   </span>
                   <span className="text-sm font-semibold text-[#4fc3f7] shrink-0">
