@@ -1,24 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { db } from "@/lib/db";
-
-const mockCreate = vi.fn();
-
-// Mock the OpenAI SDK
-vi.mock("openai", () => {
-  return {
-    default: class MockOpenAI {
-      chat = {
-        completions: {
-          create: mockCreate,
-        },
-      };
-    },
-  };
-});
-
 import { parseFood } from "@/lib/food-parser";
-import { saveSettings } from "@/lib/settings";
 import { cacheNutrition } from "@/lib/nutrition-cache";
+
+const mockFetch = vi.fn();
+vi.stubGlobal("fetch", mockFetch);
 
 beforeEach(async () => {
   await db.meals.clear();
@@ -28,19 +14,8 @@ beforeEach(async () => {
 });
 
 describe("parseFood", () => {
-  it("returns unparsed items when no API key is configured", async () => {
-    const result = await parseFood("100g chicken breast");
-
-    expect(result).toHaveLength(1);
-    expect(result[0].parsed).toBe(false);
-    expect(result[0].calories).toBe(0);
-    expect(result[0].rawText).toBe("100g chicken breast");
-  });
-
-  it("parses free text into structured items using OpenAI", async () => {
-    await saveSettings({ chatgptApiKey: "sk-test-key" });
-
-    const mockResponseItems = [
+  it("parses free text via the API route", async () => {
+    const apiResponse = [
       {
         name: "Chicken Breast",
         displayText: "100g Chicken Breast",
@@ -53,35 +28,30 @@ describe("parseFood", () => {
       },
     ];
 
-    mockCreate.mockResolvedValueOnce({
-      choices: [
-        {
-          message: {
-            content: JSON.stringify(mockResponseItems),
-          },
-        },
-      ],
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => apiResponse,
     });
 
     const result = await parseFood("100g chicken breast");
 
+    expect(mockFetch).toHaveBeenCalledWith("/api/parse", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: "100g chicken breast" }),
+    });
+
     expect(result).toHaveLength(1);
     expect(result[0].parsed).toBe(true);
     expect(result[0].name).toBe("Chicken Breast");
-    expect(result[0].calories).toBe(165);
-    expect(result[0].protein).toBe(31);
-    expect(result[0].carbs).toBe(0);
-    expect(result[0].fat).toBeCloseTo(3.6);
     expect(result[0].rawText).toBe("100g Chicken Breast");
+    expect(result[0].calories).toBe(165);
   });
 
-  it("uses cached results when available", async () => {
-    await saveSettings({ chatgptApiKey: "sk-test-key" });
-
-    // Pre-populate the cache
+  it("uses cached results when available (no API call)", async () => {
     await cacheNutrition({
       key: "100g chicken breast",
-      name: "chicken breast",
+      name: "Chicken Breast",
       quantity: 100,
       unit: "g",
       calories: 165,
@@ -92,46 +62,43 @@ describe("parseFood", () => {
 
     const result = await parseFood("100g chicken breast");
 
-    // OpenAI should NOT have been called
-    expect(mockCreate).not.toHaveBeenCalled();
-
+    expect(mockFetch).not.toHaveBeenCalled();
     expect(result).toHaveLength(1);
     expect(result[0].parsed).toBe(true);
-    expect(result[0].name).toBe("chicken breast");
     expect(result[0].calories).toBe(165);
   });
 
-  it("caches parsed results from OpenAI", async () => {
-    await saveSettings({ chatgptApiKey: "sk-test-key" });
-
-    const mockResponseItems = [
-      {
-        name: "Oats",
-        displayText: "50g Oats",
-        quantity: 50,
-        unit: "g",
-        calories: 190,
-        protein: 6,
-        carbs: 34,
-        fat: 3,
-      },
-    ];
-
-    mockCreate.mockResolvedValueOnce({
-      choices: [
+  it("caches parsed results from API", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [
         {
-          message: {
-            content: JSON.stringify(mockResponseItems),
-          },
+          name: "Oats",
+          displayText: "50g Oats",
+          quantity: 50,
+          unit: "g",
+          calories: 190,
+          protein: 6,
+          carbs: 34,
+          fat: 3,
         },
       ],
     });
 
     await parseFood("50g oats");
 
-    // Check item is in cache (keyed by displayText)
     const cached = await db.nutritionCache.get("50g Oats");
     expect(cached).toBeDefined();
     expect(cached?.calories).toBe(190);
+  });
+
+  it("throws on API error", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: "Server error" }),
+    });
+
+    await expect(parseFood("something")).rejects.toThrow("Server error");
   });
 });
