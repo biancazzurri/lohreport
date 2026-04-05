@@ -95,12 +95,6 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      {/* ChatGPT API — server-side */}
-      <section className="bg-[#252545] rounded-xl p-4 mb-4">
-        <div className="text-sm font-medium text-gray-200">Food Parsing</div>
-        <div className="text-xs text-gray-500 mt-1">Powered by ChatGPT · API key managed on server</div>
-      </section>
-
       {/* Backup */}
       <section className="bg-[#252545] rounded-xl p-4 mb-4">
         <h2 className="text-sm font-semibold text-gray-200 mb-3">
