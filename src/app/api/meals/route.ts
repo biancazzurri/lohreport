@@ -1,7 +1,37 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { getDb, ensureTables } from "@/lib/db-server";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+const MealItemSchema = z.object({
+  rawText: z.string().max(200),
+  name: z.string().max(100),
+  quantity: z.number().min(0).max(100_000),
+  unit: z.string().max(20),
+  calories: z.number().min(0).max(100_000),
+  protein: z.number().min(0).max(10_000),
+  carbs: z.number().min(0).max(10_000),
+  fat: z.number().min(0).max(10_000),
+  parsed: z.boolean(),
+});
+
+const MealSchema = z.object({
+  id: z.string().uuid(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  time: z.string().regex(/^\d{2}:\d{2}$/),
+  items: z.array(MealItemSchema).min(1).max(50),
+  totalCalories: z.number().min(0),
+  totalProtein: z.number().min(0),
+  totalCarbs: z.number().min(0),
+  totalFat: z.number().min(0),
+  createdAt: z.number(),
+});
+
+const DeleteSchema = z.object({
+  id: z.string().uuid(),
+});
 
 // GET — fetch meals for a date (or all)
 export async function GET(request: Request) {
@@ -49,8 +79,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  if (!checkRateLimit(`meals:${session.user.email}`, 60_000, 30)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   try {
-    const meal = await request.json();
+    const body = await request.json();
+    const parsed = MealSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid meal data" }, { status: 400 });
+    }
+
+    const meal = parsed.data;
     const sql = getDb();
     await ensureTables();
 
@@ -91,10 +131,15 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    const { id } = await request.json();
+    const body = await request.json();
+    const parsed = DeleteSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+
     const sql = getDb();
     await ensureTables();
-    await sql`DELETE FROM meals WHERE id = ${id} AND user_email = ${session.user.email}`;
+    await sql`DELETE FROM meals WHERE id = ${parsed.data.id} AND user_email = ${session.user.email}`;
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("Meals DELETE failed:", err);

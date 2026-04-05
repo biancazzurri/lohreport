@@ -27,17 +27,30 @@ export async function syncFromServer(): Promise<void> {
       }
     }
 
-    // Merge settings: server wins
+    // Sync settings
+    const localSettings = await db.settings.get("settings");
     if (serverSettings && serverSettings.calorieGoal) {
-      const current = await db.settings.get("settings");
+      // Server has settings — write to local
       await db.settings.put({
         id: "settings",
         calorieGoal: serverSettings.calorieGoal,
         proteinGoal: serverSettings.proteinGoal,
         carbsGoal: serverSettings.carbsGoal,
         fatGoal: serverSettings.fatGoal,
-        chatgptApiKey: current?.chatgptApiKey ?? "",
+        chatgptApiKey: localSettings?.chatgptApiKey ?? "",
       });
+    } else if (localSettings && localSettings.calorieGoal !== 2100) {
+      // Server has no settings but local does — push local to server
+      await fetch("/api/backup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          calorieGoal: localSettings.calorieGoal,
+          proteinGoal: localSettings.proteinGoal,
+          carbsGoal: localSettings.carbsGoal,
+          fatGoal: localSettings.fatGoal,
+        }),
+      }).catch(() => {});
     }
 
     console.log("[sync] pulled", serverMeals.length, "meals from server");
