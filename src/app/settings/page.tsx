@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useSettings } from "@/hooks/use-settings";
-import { downloadBackup, importData } from "@/lib/backup";
 import { db } from "@/lib/db";
+import type { Meal } from "@/lib/types";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -22,15 +22,29 @@ export default function SettingsPage() {
   const [clearing, setClearing] = useState(false);
 
   async function handleRestore() {
-    if (!window.confirm("Restore data from backup? This will overwrite all current data.")) {
+    if (!window.confirm("Restore from server? This will overwrite local data.")) {
       return;
     }
     setRestoring(true);
     setRestoreError("");
     setRestoreSuccess(false);
     try {
-      const json = await downloadBackup();
-      await importData(json);
+      // Fetch meals from server
+      const mealsRes = await fetch("/api/meals");
+      if (!mealsRes.ok) throw new Error("Failed to fetch meals");
+      const meals: Meal[] = await mealsRes.json();
+
+      // Fetch settings from server
+      const settingsRes = await fetch("/api/backup");
+      const serverSettings = settingsRes.ok ? await settingsRes.json() : null;
+
+      // Replace local IndexedDB
+      await db.meals.clear();
+      if (meals.length) await db.meals.bulkAdd(meals);
+      if (serverSettings) {
+        await db.settings.put({ id: "settings", ...serverSettings, chatgptApiKey: "" });
+      }
+
       setRestoreSuccess(true);
     } catch (err) {
       setRestoreError(

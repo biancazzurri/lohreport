@@ -51,6 +51,12 @@ export async function addMeal({
   };
 
   await db.meals.put(meal);
+  // Sync to server
+  fetch("/api/meals", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(meal),
+  }).catch((err) => console.error("[sync] meal save failed:", err));
   return meal;
 }
 
@@ -61,6 +67,12 @@ export async function getMealsByDate(date: string): Promise<Meal[]> {
 
 export async function deleteMeal(id: string): Promise<void> {
   await db.meals.delete(id);
+  // Sync to server
+  fetch("/api/meals", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id }),
+  }).catch((err) => console.error("[sync] meal delete failed:", err));
 }
 
 export async function updateMeal(

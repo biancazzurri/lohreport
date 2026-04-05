@@ -7,7 +7,6 @@ import { MacroSlider } from "@/components/macro-slider";
 import { CalorieBreakdown } from "@/components/calorie-breakdown";
 import { useSettings } from "@/hooks/use-settings";
 import { saveSettings } from "@/lib/settings";
-import { scheduleBackup } from "@/lib/backup";
 
 export default function GoalsPage() {
   const router = useRouter();
@@ -87,7 +86,6 @@ export default function GoalsPage() {
       carbsGoal: carbs,
       fatGoal: fat,
     });
-    scheduleBackup();
     router.push("/settings");
   }
 

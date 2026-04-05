@@ -21,5 +21,16 @@ export async function saveSettings(updates: Partial<Omit<Settings, "id">>): Prom
   const current = await getSettings();
   const updated: Settings = { ...current, ...updates };
   await db.settings.put(updated);
+  // Sync to server
+  fetch("/api/backup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      calorieGoal: updated.calorieGoal,
+      proteinGoal: updated.proteinGoal,
+      carbsGoal: updated.carbsGoal,
+      fatGoal: updated.fatGoal,
+    }),
+  }).catch((err) => console.error("[sync] settings save failed:", err));
   return updated;
 }

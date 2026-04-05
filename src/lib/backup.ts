@@ -28,7 +28,7 @@ export async function importData(data: BackupData): Promise<void> {
   });
 }
 
-async function uploadBackup(): Promise<void> {
+export async function uploadBackup(): Promise<void> {
   const data = await exportData();
   console.log("[backup] uploading:", data.meals.length, "meals,", data.nutritionCache.length, "cached foods");
   const res = await fetch("/api/backup", {
@@ -48,16 +48,4 @@ export async function downloadBackup(): Promise<BackupData> {
   const res = await fetch("/api/backup");
   if (!res.ok) throw new Error("No backup found");
   return res.json();
-}
-
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-
-export function scheduleBackup(): void {
-  if (debounceTimer !== null) {
-    clearTimeout(debounceTimer);
-  }
-  debounceTimer = setTimeout(() => {
-    debounceTimer = null;
-    uploadBackup().catch(console.error);
-  }, 5000);
 }

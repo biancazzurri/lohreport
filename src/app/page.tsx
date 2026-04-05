@@ -11,7 +11,6 @@ import { MealList } from "@/components/meal-list";
 import { DateNav } from "@/components/date-nav";
 import { AddButton } from "@/components/add-button";
 import { deleteMeal } from "@/lib/meals";
-import { scheduleBackup } from "@/lib/backup";
 import { AuthGuard } from "@/components/auth-guard";
 
 function todayDate(): string {
@@ -44,7 +43,6 @@ export default function Home() {
 
   async function handleDelete(id: string) {
     await deleteMeal(id);
-    scheduleBackup();
   }
 
   return (
