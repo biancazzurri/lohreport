@@ -3,8 +3,11 @@ import type { Meal, Settings } from "./types";
 
 export async function syncFromServer(): Promise<void> {
   try {
-    // Fetch all meals from server
-    const mealsRes = await fetch("/api/meals");
+    // Fetch last 10 days of meals from server
+    const since = new Date();
+    since.setDate(since.getDate() - 10);
+    const sinceStr = since.toISOString().slice(0, 10);
+    const mealsRes = await fetch(`/api/meals?since=${sinceStr}`);
     if (!mealsRes.ok) return;
     const serverMeals: Meal[] = await mealsRes.json();
 

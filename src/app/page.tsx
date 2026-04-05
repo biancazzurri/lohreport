@@ -68,8 +68,20 @@ export default function Home() {
 
         <DateNav
           date={date}
-          onPrev={() => setDate((d) => shiftDate(d, -1))}
-          onNext={() => setDate((d) => shiftDate(d, 1))}
+          onPrev={() => {
+            const minDate = shiftDate(todayDate(), -10);
+            setDate((d) => {
+              const prev = shiftDate(d, -1);
+              return prev >= minDate ? prev : d;
+            });
+          }}
+          onNext={() => {
+            const today = todayDate();
+            setDate((d) => {
+              const next = shiftDate(d, 1);
+              return next <= today ? next : d;
+            });
+          }}
         />
 
         <CalorieRing current={totals.calories} target={settings.calorieGoal} />

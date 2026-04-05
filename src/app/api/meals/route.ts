@@ -13,11 +13,14 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get("date");
+    const since = searchParams.get("since");
     const sql = getDb();
     await ensureTables();
 
     const rows = date
       ? await sql`SELECT * FROM meals WHERE user_email = ${session.user.email} AND date = ${date} ORDER BY time`
+      : since
+      ? await sql`SELECT * FROM meals WHERE user_email = ${session.user.email} AND date >= ${since} ORDER BY date DESC, time`
       : await sql`SELECT * FROM meals WHERE user_email = ${session.user.email} ORDER BY date DESC, time`;
 
     const meals = rows.map((r) => ({
