@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Health Tracker",
+  title: "Loh Report",
   description: "Track your daily meals and macros",
   manifest: "/manifest.json",
 };

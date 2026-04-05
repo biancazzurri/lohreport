@@ -51,7 +51,7 @@ export default function Home() {
       {/* Sticky header */}
       <div className={`sticky top-0 z-10 bg-[#1a1a2e] transition-all duration-200 ${scrolled ? "pb-2 shadow-lg shadow-black/20" : "pb-0"}`}>
         <div className="flex items-center justify-between px-4 pt-4">
-          <h1 className="text-base font-semibold text-gray-200">Health Tracker</h1>
+          <h1 className="text-base font-semibold text-gray-200">Loh Report</h1>
           <Link
             href="/settings"
             className="text-gray-400 hover:text-gray-200 text-xl"
