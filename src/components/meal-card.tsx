@@ -36,11 +36,16 @@ export function MealCard({ meal, onDelete }: MealCardProps) {
           const pPct = (meal.totalProtein / totalGrams) * 100;
           const cPct = (meal.totalCarbs / totalGrams) * 100;
           const fPct = (meal.totalFat / totalGrams) * 100;
+          const macros = [
+            { grams: meal.totalProtein, pct: pPct, color: "#81c784" },
+            { grams: meal.totalCarbs, pct: cPct, color: "#ffb74d" },
+            { grams: meal.totalFat, pct: fPct, color: "#f48fb1" },
+          ].filter((m) => Math.round(m.grams) > 0);
           return (
             <div className="flex h-[8px] flex-1 rounded-full overflow-hidden mt-1.5 text-[8px] font-bold leading-none">
-              <div className="bg-[#81c784] flex items-center justify-center text-[#0a0a1a]" style={{ width: `${pPct}%` }}>{Math.round(meal.totalProtein)}g</div>
-              <div className="bg-[#ffb74d] flex items-center justify-center text-[#0a0a1a]" style={{ width: `${cPct}%` }}>{Math.round(meal.totalCarbs)}g</div>
-              <div className="bg-[#f48fb1] flex items-center justify-center text-[#0a0a1a]" style={{ width: `${fPct}%` }}>{Math.round(meal.totalFat)}g</div>
+              {macros.map((m) => (
+                <div key={m.color} className="flex items-center justify-center text-[#0a0a1a]" style={{ width: `${m.pct}%`, backgroundColor: m.color }}>{Math.round(m.grams)}g</div>
+              ))}
             </div>
           );
         })()}
