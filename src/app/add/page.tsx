@@ -38,9 +38,8 @@ export default function AddPage() {
     setParsedItems(shortcut.items);
   }
 
-  async function handleConfirm() {
-    if (!parsedItems) return;
-    await addMeal({ items: parsedItems });
+  async function handleConfirm(items: MealItem[]) {
+    await addMeal({ items });
     router.push("/");
   }
 
