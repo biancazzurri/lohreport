@@ -6,21 +6,30 @@ interface MacroBarProps {
 }
 
 function MacroBar({ label, current, target, color }: MacroBarProps) {
-  const progress = target > 0 ? Math.min(current / target, 1) : 0;
+  const over = target > 0 && current > target;
+  const ratio = target > 0 ? current / target : 0;
+  const normalPct = over ? (target / current) * 100 : Math.min(ratio, 1) * 100;
+  const overPct = over ? ((current - target) / current) * 100 : 0;
 
   return (
     <div className="flex-1">
       <div className="flex justify-between items-baseline mb-1">
         <span className="text-xs font-medium text-gray-300">{label}</span>
-        <span className="text-xs text-gray-500">
-          {Math.round(current)}/{target}g
+        <span className={`text-xs ${over ? "text-[#ef5350] font-semibold" : "text-gray-500"}`}>
+          {Math.round(current)}/{target}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-[#252545] overflow-hidden">
+      <div className="flex h-2 rounded-full bg-[#252545] overflow-hidden">
         <div
-          className="h-full rounded-full transition-all"
-          style={{ width: `${progress * 100}%`, backgroundColor: color }}
+          className="h-full transition-all"
+          style={{ width: `${normalPct}%`, backgroundColor: color, borderRadius: over ? "9999px 0 0 9999px" : "9999px" }}
         />
+        {over && (
+          <div
+            className="h-full rounded-r-full transition-all bg-[#ef5350]"
+            style={{ width: `${overPct}%` }}
+          />
+        )}
       </div>
     </div>
   );
