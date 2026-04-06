@@ -48,16 +48,27 @@ export function MealInput({ onSubmit, onTypingChange }: MealInputProps) {
 
   return (
     <div className="relative">
-      <input
-        ref={inputRef}
-        type="text"
-        autoFocus
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="What did you eat?"
-        className="w-full bg-[#252545] text-gray-100 placeholder-gray-500 rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#4fc3f7]"
-      />
+      <div className="flex gap-2">
+        <input
+          ref={inputRef}
+          type="text"
+          autoFocus
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="What did you eat?"
+          className="flex-1 bg-[#252545] text-gray-100 placeholder-gray-500 rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#4fc3f7]"
+        />
+        <button
+          type="button"
+          onClick={() => { if (value.trim()) { setSuggestions([]); onSubmit(value.trim()); } }}
+          disabled={!value.trim()}
+          className="bg-[#4fc3f7] disabled:opacity-30 text-[#0a0a1a] rounded-xl px-4 py-3 font-semibold text-sm transition-opacity"
+          aria-label="Submit"
+        >
+          Log
+        </button>
+      </div>
       {suggestions.length > 0 && (
         <ul className="absolute z-10 w-full mt-1 bg-[#1e1e3a] border border-[#4fc3f7]/20 rounded-xl overflow-hidden shadow-lg shadow-[#4fc3f7]/5">
           {suggestions.map((food) => (
