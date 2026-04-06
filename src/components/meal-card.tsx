@@ -30,11 +30,20 @@ export function MealCard({ meal, onDelete }: MealCardProps) {
             {Math.round(meal.totalCalories)} cal
           </span>
         </div>
-        <div className="flex gap-3 text-[10px] font-semibold mt-1">
-          <span className="text-[#81c784]">P {Math.round(meal.totalProtein)}g</span>
-          <span className="text-[#ffb74d]">C {Math.round(meal.totalCarbs)}g</span>
-          <span className="text-[#f48fb1]">F {Math.round(meal.totalFat)}g</span>
-        </div>
+        {(() => {
+          const totalGrams = meal.totalProtein + meal.totalCarbs + meal.totalFat;
+          if (totalGrams === 0) return null;
+          const pPct = (meal.totalProtein / totalGrams) * 100;
+          const cPct = (meal.totalCarbs / totalGrams) * 100;
+          const fPct = (meal.totalFat / totalGrams) * 100;
+          return (
+            <div className="flex h-[8px] flex-1 rounded-full overflow-hidden mt-1.5 text-[8px] font-bold leading-none">
+              <div className="bg-[#81c784] flex items-center justify-center text-[#0a0a1a]" style={{ width: `${pPct}%` }}>{Math.round(meal.totalProtein)}g</div>
+              <div className="bg-[#ffb74d] flex items-center justify-center text-[#0a0a1a]" style={{ width: `${cPct}%` }}>{Math.round(meal.totalCarbs)}g</div>
+              <div className="bg-[#f48fb1] flex items-center justify-center text-[#0a0a1a]" style={{ width: `${fPct}%` }}>{Math.round(meal.totalFat)}g</div>
+            </div>
+          );
+        })()}
       </button>
 
       {/* Expanded detail */}
