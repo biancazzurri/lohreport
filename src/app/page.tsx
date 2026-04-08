@@ -46,6 +46,27 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Adjust macro goals: if a macro is overdosed, reduce others to stay within calorie budget
+  const calPerG = { protein: 4, carbs: 4, fat: 9 } as const;
+  const goals = { protein: settings.proteinGoal, carbs: settings.carbsGoal, fat: settings.fatGoal };
+  const cur = { protein: totals.protein, carbs: totals.carbs, fat: totals.fat };
+  const keys = ["protein", "carbs", "fat"] as const;
+
+  let excessCals = 0;
+  for (const k of keys) {
+    if (cur[k] > goals[k]) excessCals += (cur[k] - goals[k]) * calPerG[k];
+  }
+
+  const adjustedGoals = { ...goals };
+  if (excessCals > 0) {
+    const under = keys.filter((k) => cur[k] <= goals[k]);
+    const underCals = under.reduce((s, k) => s + goals[k] * calPerG[k], 0);
+    if (underCals > 0) {
+      const scale = Math.max(0, (underCals - excessCals) / underCals);
+      for (const k of under) adjustedGoals[k] = Math.round(goals[k] * scale);
+    }
+  }
+
   async function handleDelete(id: string) {
     await deleteMeal(id);
   }
@@ -89,9 +110,9 @@ export default function Home() {
         <div className="transition-all duration-300 ease-in-out overflow-hidden"
           style={{ maxHeight: scrolled ? 0 : 60, opacity: scrolled ? 0 : 1 }}>
           <MacroBars
-            protein={{ current: totals.protein, target: settings.proteinGoal }}
-            carbs={{ current: totals.carbs, target: settings.carbsGoal }}
-            fat={{ current: totals.fat, target: settings.fatGoal }}
+            protein={{ current: totals.protein, target: adjustedGoals.protein }}
+            carbs={{ current: totals.carbs, target: adjustedGoals.carbs }}
+            fat={{ current: totals.fat, target: adjustedGoals.fat }}
           />
         </div>
       </div>
