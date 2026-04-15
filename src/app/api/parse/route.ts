@@ -40,12 +40,22 @@ Example output:
 
 const TRAINING_SYSTEM_PROMPT = `You are a fitness assistant. The user describes a training activity. Estimate the calories burned and return ONLY a valid JSON object. No markdown, no explanation — just the raw JSON.
 
-The JSON must have these fields:
-- description: string (clean, normalized description — e.g. "45 min running", "1 hour weight training")
-- caloriesBurned: number (estimated calories burned, assume an average adult)
+The user often logs weight training using rep notation: "AxB" means A sets of B reps. Examples:
+- "4x6 backsquat 80 kilo" = 4 sets of 6 reps of back squat at 80 kg
+- "3x10 bench press 60kg" = 3 sets of 10 reps of bench press at 60 kg
+- "5x5 deadlift 100" = 5 sets of 5 reps of deadlift at 100 kg
 
-Example output:
-{"description":"45 min running","caloriesBurned":450}`;
+For weight training, estimate calories based on total volume (sets × reps), exercise type, and weight used. An average adult burns roughly 3-6 calories per set of compound lifts and 2-4 per set of isolation exercises, but scale with weight and rep count.
+
+The user may also log cardio like "45 min running" or "30 min cycling".
+
+The JSON must have these fields:
+- description: string (clean, normalized description — e.g. "Back Squat 4×6 @ 80 kg", "45 min Running")
+- caloriesBurned: number (estimated calories burned, assume an average adult male)
+
+Example outputs:
+{"description":"Back Squat 4×6 @ 80 kg","caloriesBurned":120}
+{"description":"45 min Running","caloriesBurned":450}`;
 
 const TrainingResultSchema = z.object({
   description: z.string().max(200),
