@@ -8,10 +8,14 @@ interface MealInputProps {
   onSubmit: (text: string) => void;
   onTypingChange?: (isTyping: boolean) => void;
   placeholder?: string;
+  value?: string;
+  onValueChange?: (v: string) => void;
 }
 
-export function MealInput({ onSubmit, onTypingChange, placeholder }: MealInputProps) {
-  const [value, setValue] = useState("");
+export function MealInput({ onSubmit, onTypingChange, placeholder, value: controlledValue, onValueChange }: MealInputProps) {
+  const [internalValue, setInternalValue] = useState("");
+  const value = controlledValue ?? internalValue;
+  const setValue = onValueChange ?? setInternalValue;
   const [suggestions, setSuggestions] = useState<NutritionCacheEntry[]>([]);
   const [allFoods, setAllFoods] = useState<NutritionCacheEntry[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);

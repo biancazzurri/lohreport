@@ -22,6 +22,7 @@ export default function AddPage() {
   const isTraining = searchParams.get("type") === "training";
 
   const shortcuts = useShortcuts();
+  const [inputText, setInputText] = useState("");
   const [parsedItems, setParsedItems] = useState<MealItem[] | null>(null);
   const [trainingResult, setTrainingResult] = useState<{ description: string; caloriesBurned: number } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -113,7 +114,7 @@ export default function AddPage() {
         />
       ) : (
         <>
-          <MealInput onSubmit={handleTextSubmit} onTypingChange={setShowingSuggestions} placeholder={placeholder} />
+          <MealInput onSubmit={handleTextSubmit} onTypingChange={setShowingSuggestions} placeholder={placeholder} value={inputText} onValueChange={setInputText} />
           {!isTraining && (
             <div className={`transition-all duration-200 ${showingSuggestions ? "opacity-30 blur-sm pointer-events-none" : ""}`}>
               <ShortcutList shortcuts={shortcuts} onSelect={handleShortcutSelect} onDismiss={dismissShortcut} />
