@@ -1,5 +1,5 @@
 import Dexie, { type Table } from "dexie";
-import type { Meal, NutritionCacheEntry, Settings } from "./types";
+import type { Meal, NutritionCacheEntry, Settings, TrainingSession } from "./types";
 
 export interface DismissedShortcut {
   fingerprint: string;
@@ -11,6 +11,7 @@ export class HealthDB extends Dexie {
   nutritionCache!: Table<NutritionCacheEntry, string>;
   settings!: Table<Settings, string>;
   dismissedShortcuts!: Table<DismissedShortcut, string>;
+  trainingSessions!: Table<TrainingSession, string>;
 
   constructor() {
     super("HealthDB");
@@ -26,6 +27,14 @@ export class HealthDB extends Dexie {
       nutritionCache: "key",
       settings: "id",
       dismissedShortcuts: "fingerprint",
+    });
+
+    this.version(3).stores({
+      meals: "id, date, createdAt",
+      nutritionCache: "key",
+      settings: "id",
+      dismissedShortcuts: "fingerprint",
+      trainingSessions: "id, date, createdAt",
     });
   }
 }

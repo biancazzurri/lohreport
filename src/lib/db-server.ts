@@ -38,4 +38,16 @@ export async function ensureTables() {
       fat_goal REAL NOT NULL DEFAULT 70
     )
   `;
+  await sql`
+    CREATE TABLE IF NOT EXISTS training_sessions (
+      id TEXT PRIMARY KEY,
+      user_email TEXT NOT NULL,
+      date TEXT NOT NULL,
+      time TEXT NOT NULL,
+      description TEXT NOT NULL,
+      calories_burned REAL NOT NULL DEFAULT 0,
+      created_at BIGINT NOT NULL
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_training_user_date ON training_sessions (user_email, date)`;
 }

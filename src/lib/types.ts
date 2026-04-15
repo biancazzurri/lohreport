@@ -42,3 +42,12 @@ export interface Settings {
   fatGoal: number;
   chatgptApiKey: string;
 }
+
+export interface TrainingSession {
+  id: string;
+  date: string; // YYYY-MM-DD
+  time: string; // HH:MM
+  description: string;
+  caloriesBurned: number;
+  createdAt: number;
+}
