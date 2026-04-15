@@ -7,6 +7,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 const ParseRequestSchema = z.object({
   text: z.string().min(1).max(500),
+  mode: z.enum(["meal", "training"]).default("meal"),
 });
 
 const ParsedItemSchema = z.object({
@@ -37,6 +38,20 @@ Normalize names: capitalize properly, use common English names, remove redundant
 Example output:
 [{"name":"Chicken Breast","displayText":"100g Chicken Breast","quantity":100,"unit":"g","calories":165,"protein":31,"carbs":0,"fat":3.6}]`;
 
+const TRAINING_SYSTEM_PROMPT = `You are a fitness assistant. The user describes a training activity. Estimate the calories burned and return ONLY a valid JSON object. No markdown, no explanation — just the raw JSON.
+
+The JSON must have these fields:
+- description: string (clean, normalized description — e.g. "45 min running", "1 hour weight training")
+- caloriesBurned: number (estimated calories burned, assume an average adult)
+
+Example output:
+{"description":"45 min running","caloriesBurned":450}`;
+
+const TrainingResultSchema = z.object({
+  description: z.string().max(200),
+  caloriesBurned: z.number().min(0).max(100_000),
+});
+
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
@@ -60,11 +75,12 @@ export async function POST(request: Request) {
     }
 
     const client = new OpenAI({ apiKey });
+    const systemPrompt = parsed.data.mode === "training" ? TRAINING_SYSTEM_PROMPT : SYSTEM_PROMPT;
 
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: systemPrompt },
         { role: "user", content: parsed.data.text },
       ],
     });
@@ -72,6 +88,14 @@ export async function POST(request: Request) {
     const content = response.choices[0]?.message?.content ?? "[]";
     const cleaned = content.replace(/^```(?:json)?\n?/g, "").replace(/\n?```$/g, "").trim();
     const raw = JSON.parse(cleaned);
+
+    if (parsed.data.mode === "training") {
+      const result = TrainingResultSchema.safeParse(raw);
+      if (!result.success) {
+        return NextResponse.json({ error: "Failed to parse training" }, { status: 500 });
+      }
+      return NextResponse.json(result.data);
+    }
 
     const items = z.array(ParsedItemSchema).safeParse(raw);
     if (!items.success) {
