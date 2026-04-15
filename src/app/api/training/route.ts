@@ -5,12 +5,17 @@ import { authOptions } from "@/lib/auth";
 import { getDb, ensureTables } from "@/lib/db-server";
 import { checkRateLimit } from "@/lib/rate-limit";
 
+const ExerciseSchema = z.object({
+  description: z.string().min(1).max(200),
+  caloriesBurned: z.number().min(0).max(100_000),
+});
+
 const TrainingSchema = z.object({
   id: z.string().uuid(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   time: z.string().regex(/^\d{2}:\d{2}$/),
-  description: z.string().min(1).max(500),
-  caloriesBurned: z.number().min(0).max(100_000),
+  exercises: z.array(ExerciseSchema).min(1).max(50),
+  totalCaloriesBurned: z.number().min(0).max(100_000),
   createdAt: z.number(),
 });
 
@@ -38,8 +43,8 @@ export async function GET(request: Request) {
       id: r.id,
       date: r.date,
       time: r.time,
-      description: r.description,
-      caloriesBurned: r.calories_burned,
+      exercises: r.exercises,
+      totalCaloriesBurned: r.total_calories_burned,
       createdAt: Number(r.created_at),
     }));
 
@@ -72,11 +77,11 @@ export async function POST(request: Request) {
     await ensureTables();
 
     await sql`
-      INSERT INTO training_sessions (id, user_email, date, time, description, calories_burned, created_at)
-      VALUES (${t.id}, ${session.user.email}, ${t.date}, ${t.time}, ${t.description}, ${t.caloriesBurned}, ${t.createdAt})
+      INSERT INTO training_sessions (id, user_email, date, time, exercises, total_calories_burned, created_at)
+      VALUES (${t.id}, ${session.user.email}, ${t.date}, ${t.time}, ${JSON.stringify(t.exercises)}::jsonb, ${t.totalCaloriesBurned}, ${t.createdAt})
       ON CONFLICT (id) DO UPDATE SET
-        description = ${t.description},
-        calories_burned = ${t.caloriesBurned}
+        exercises = ${JSON.stringify(t.exercises)}::jsonb,
+        total_calories_burned = ${t.totalCaloriesBurned}
     `;
 
     return NextResponse.json({ ok: true });

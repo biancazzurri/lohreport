@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { db } from "./db";
-import type { TrainingSession } from "./types";
+import type { Exercise, TrainingSession } from "./types";
 
 function todayDate(): string {
   return new Date().toISOString().slice(0, 10);
@@ -14,13 +14,11 @@ function currentTime(): string {
 }
 
 export async function addTraining({
-  description,
-  caloriesBurned,
+  exercises,
   date,
   time,
 }: {
-  description: string;
-  caloriesBurned: number;
+  exercises: Exercise[];
   date?: string;
   time?: string;
 }): Promise<TrainingSession> {
@@ -28,8 +26,8 @@ export async function addTraining({
     id: uuidv4(),
     date: date ?? todayDate(),
     time: time ?? currentTime(),
-    description,
-    caloriesBurned,
+    exercises,
+    totalCaloriesBurned: exercises.reduce((s, e) => s + e.caloriesBurned, 0),
     createdAt: Date.now(),
   };
 

@@ -23,7 +23,7 @@ export function useDailyTotals(date: string): DailyTotals {
     { calories: 0, protein: 0, carbs: 0, fat: 0 }
   );
 
-  const burned = training.reduce((sum, s) => sum + s.caloriesBurned, 0);
+  const burned = training.reduce((sum, s) => sum + s.totalCaloriesBurned, 0);
 
   return { ...mealTotals, burned };
 }

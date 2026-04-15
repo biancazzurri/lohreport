@@ -43,11 +43,16 @@ export interface Settings {
   chatgptApiKey: string;
 }
 
+export interface Exercise {
+  description: string;
+  caloriesBurned: number;
+}
+
 export interface TrainingSession {
   id: string;
   date: string; // YYYY-MM-DD
   time: string; // HH:MM
-  description: string;
-  caloriesBurned: number;
+  exercises: Exercise[];
+  totalCaloriesBurned: number;
   createdAt: number;
 }

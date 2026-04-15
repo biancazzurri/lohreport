@@ -44,8 +44,8 @@ export async function ensureTables() {
       user_email TEXT NOT NULL,
       date TEXT NOT NULL,
       time TEXT NOT NULL,
-      description TEXT NOT NULL,
-      calories_burned REAL NOT NULL DEFAULT 0,
+      exercises JSONB NOT NULL,
+      total_calories_burned REAL NOT NULL DEFAULT 0,
       created_at BIGINT NOT NULL
     )
   `;
