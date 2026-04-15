@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { MealInput } from "@/components/meal-input";
@@ -17,6 +17,14 @@ import type { MealItem } from "@/lib/types";
 import type { Shortcut } from "@/lib/shortcuts";
 
 export default function AddPage() {
+  return (
+    <Suspense>
+      <AddPageContent />
+    </Suspense>
+  );
+}
+
+function AddPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isTraining = searchParams.get("type") === "training";
