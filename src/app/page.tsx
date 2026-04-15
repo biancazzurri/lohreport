@@ -11,6 +11,8 @@ import { MealList } from "@/components/meal-list";
 import { DateNav } from "@/components/date-nav";
 import { AddButton } from "@/components/add-button";
 import { deleteMeal } from "@/lib/meals";
+import { deleteTraining } from "@/lib/training";
+import { useTrainingSessions } from "@/hooks/use-training-sessions";
 import { syncFromServer } from "@/lib/sync";
 import { AuthGuard } from "@/components/auth-guard";
 
@@ -33,6 +35,7 @@ export default function Home() {
   const meals = useMeals(date);
   const settings = useSettings();
   const totals = useDailyTotals(date);
+  const trainingSessions = useTrainingSessions(date);
 
   useEffect(() => {
     syncFromServer();
@@ -46,9 +49,15 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Adjust macro goals: if a macro is overdosed, reduce others to stay within calorie budget
+  // Effective goals: base goals + burned calories (scaled proportionally)
   const calPerG = { protein: 4, carbs: 4, fat: 9 } as const;
-  const goals = { protein: settings.proteinGoal, carbs: settings.carbsGoal, fat: settings.fatGoal };
+  const effectiveCalorieGoal = settings.calorieGoal + totals.burned;
+  const goalScale = settings.calorieGoal > 0 ? effectiveCalorieGoal / settings.calorieGoal : 1;
+  const goals = {
+    protein: Math.round(settings.proteinGoal * goalScale),
+    carbs: Math.round(settings.carbsGoal * goalScale),
+    fat: Math.round(settings.fatGoal * goalScale),
+  };
   const cur = { protein: totals.protein, carbs: totals.carbs, fat: totals.fat };
   const keys = ["protein", "carbs", "fat"] as const;
 
@@ -69,6 +78,10 @@ export default function Home() {
 
   async function handleDelete(id: string) {
     await deleteMeal(id);
+  }
+
+  async function handleDeleteTraining(id: string) {
+    await deleteTraining(id);
   }
 
   return (
@@ -105,7 +118,7 @@ export default function Home() {
           }}
         />
 
-        <CalorieRing current={totals.calories} target={settings.calorieGoal} />
+        <CalorieRing current={totals.calories} target={effectiveCalorieGoal} />
 
         <div className="transition-all duration-300 ease-in-out overflow-hidden"
           style={{ maxHeight: scrolled ? 0 : 60, opacity: scrolled ? 0 : 1 }}>
@@ -119,7 +132,12 @@ export default function Home() {
 
       {/* Meal List */}
       <div className="px-4">
-        <MealList meals={meals} onDelete={handleDelete} />
+        <MealList
+          meals={meals}
+          trainingSessions={trainingSessions}
+          onDeleteMeal={handleDelete}
+          onDeleteTraining={handleDeleteTraining}
+        />
       </div>
 
       {/* Floating Add Button */}
