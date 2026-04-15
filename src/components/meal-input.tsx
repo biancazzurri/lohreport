@@ -7,9 +7,10 @@ import type { NutritionCacheEntry } from "@/lib/types";
 interface MealInputProps {
   onSubmit: (text: string) => void;
   onTypingChange?: (isTyping: boolean) => void;
+  placeholder?: string;
 }
 
-export function MealInput({ onSubmit, onTypingChange }: MealInputProps) {
+export function MealInput({ onSubmit, onTypingChange, placeholder }: MealInputProps) {
   const [value, setValue] = useState("");
   const [suggestions, setSuggestions] = useState<NutritionCacheEntry[]>([]);
   const [allFoods, setAllFoods] = useState<NutritionCacheEntry[]>([]);
@@ -56,7 +57,7 @@ export function MealInput({ onSubmit, onTypingChange }: MealInputProps) {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="What did you eat?"
+          placeholder={placeholder ?? "What did you eat?"}
           className="flex-1 bg-[#252545] text-gray-100 placeholder-gray-500 rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-[#4fc3f7]"
         />
         <button
