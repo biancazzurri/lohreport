@@ -1,4 +1,5 @@
 import { addMeal } from "./meals";
+import { db } from "./db";
 import type { MealItem } from "./types";
 
 export interface SuggestionItem {
@@ -24,11 +25,20 @@ export interface RemainingMacros {
   fat: number;
 }
 
+async function getRecentMealDescriptions(limit: number): Promise<string[]> {
+  const meals = await db.meals.orderBy("createdAt").reverse().limit(limit).toArray();
+  return meals
+    .map((m) => m.items.map((i) => i.rawText || i.name).join(", "))
+    .filter((s) => s.length > 0);
+}
+
 export async function suggestMeals(remaining: RemainingMacros): Promise<Suggestion[]> {
+  const recentMeals = await getRecentMealDescriptions(20);
+
   const res = await fetch("/api/suggest", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ remaining }),
+    body: JSON.stringify({ remaining, recentMeals }),
   });
 
   if (!res.ok) {
