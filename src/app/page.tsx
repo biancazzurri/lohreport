@@ -10,6 +10,7 @@ import { MacroBars } from "@/components/macro-bars";
 import { MealList } from "@/components/meal-list";
 import { DateNav } from "@/components/date-nav";
 import { AddButton } from "@/components/add-button";
+import { SuggestMealButton } from "@/components/suggest-meal-button";
 import { deleteMeal } from "@/lib/meals";
 import { deleteTraining } from "@/lib/training";
 import { useTrainingSessions } from "@/hooks/use-training-sessions";
@@ -76,6 +77,13 @@ export default function Home() {
     }
   }
 
+  const remaining = {
+    calories: Math.max(0, effectiveCalorieGoal - totals.calories),
+    protein: Math.max(0, adjustedGoals.protein - totals.protein),
+    carbs: Math.max(0, adjustedGoals.carbs - totals.carbs),
+    fat: Math.max(0, adjustedGoals.fat - totals.fat),
+  };
+
   async function handleDelete(id: string) {
     await deleteMeal(id);
   }
@@ -121,12 +129,13 @@ export default function Home() {
         <CalorieRing current={totals.calories} target={effectiveCalorieGoal} />
 
         <div className="transition-all duration-300 ease-in-out overflow-hidden"
-          style={{ maxHeight: scrolled ? 0 : 60, opacity: scrolled ? 0 : 1 }}>
+          style={{ maxHeight: scrolled ? 0 : 120, opacity: scrolled ? 0 : 1 }}>
           <MacroBars
             protein={{ current: totals.protein, target: adjustedGoals.protein }}
             carbs={{ current: totals.carbs, target: adjustedGoals.carbs }}
             fat={{ current: totals.fat, target: adjustedGoals.fat }}
           />
+          <SuggestMealButton remaining={remaining} date={date} />
         </div>
       </div>
 
