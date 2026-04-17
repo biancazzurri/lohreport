@@ -129,13 +129,12 @@ export default function Home() {
         <CalorieRing current={totals.calories} target={effectiveCalorieGoal} />
 
         <div className="transition-all duration-300 ease-in-out overflow-hidden"
-          style={{ maxHeight: scrolled ? 0 : 120, opacity: scrolled ? 0 : 1 }}>
+          style={{ maxHeight: scrolled ? 0 : 60, opacity: scrolled ? 0 : 1 }}>
           <MacroBars
             protein={{ current: totals.protein, target: adjustedGoals.protein }}
             carbs={{ current: totals.carbs, target: adjustedGoals.carbs }}
             fat={{ current: totals.fat, target: adjustedGoals.fat }}
           />
-          <SuggestMealButton remaining={remaining} date={date} />
         </div>
       </div>
 
@@ -151,6 +150,7 @@ export default function Home() {
 
       {/* Floating Add Button */}
       <AddButton />
+      <SuggestMealButton remaining={remaining} date={date} />
     </div>
     </AuthGuard>
   );

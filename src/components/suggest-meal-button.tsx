@@ -60,18 +60,15 @@ export function SuggestMealButton({ remaining, date }: SuggestMealButtonProps) {
 
   return (
     <>
-      <div className="px-4 pb-3">
-        <button
-          type="button"
-          onClick={handleOpen}
-          disabled={goalsMet}
-          className="w-full py-2 rounded-full bg-[#252545] text-gray-300 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-[#2d2d52] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          aria-label="Suggest meal to fill remaining macros"
-        >
-          <span>✨</span>
-          <span>{goalsMet ? "Goals met" : "Suggest meal"}</span>
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={handleOpen}
+        disabled={goalsMet}
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full bg-[#b388ff] flex items-center justify-center shadow-lg text-[#1a1a2e] text-2xl font-bold hover:bg-[#9c6eff] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        aria-label={goalsMet ? "Goals met" : "Suggest meal to fill remaining macros"}
+      >
+        ✨
+      </button>
 
       {open && (
         <MealSuggestionsModal
